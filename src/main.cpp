@@ -9,7 +9,7 @@ void InitializeLog()
 
 	*path /= Version::PROJECT;
 	*path += ".log"sv;
-	auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+	auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), false);
 
 	auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 
@@ -17,15 +17,13 @@ void InitializeLog()
 	log->flush_on(spdlog::level::err);
 
 	spdlog::set_default_logger(std::move(log));
-	spdlog::set_pattern("[%H:%M:%S:%e] %v"s);
-
-	logger::info(FMT_STRING("{} v{}"), Version::PROJECT, Version::NAME);
+	spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] %v"s);
 }
 
 void InitializeHooking() {
-	logger::trace("Initializing StackFrameOverflow hook...");
 	StackOverFlowHook::Install();
 	StackOverFlowLogHook::Install();
+	logger::info("Recursion FPS Fix hooks installed; plugin is active");
 }
 
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
@@ -53,7 +51,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	InitializeLog();
 	SKSE::Init(a_skse);
 	InitializeHooking();
-	logger::info("Loaded Plugin");
+	spdlog::default_logger()->flush();
 	return true;
 }
 
