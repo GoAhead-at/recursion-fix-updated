@@ -4,7 +4,7 @@ void InitializeLog()
 {
 	auto path = logger::log_directory();
 	if (!path) {
-		//stl::report_and_fail("Failed to find standard logging directory"sv); // Doesn't work in VR
+		return;
 	}
 
 	*path /= Version::PROJECT;
@@ -14,7 +14,7 @@ void InitializeLog()
 	auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 
 	log->set_level(spdlog::level::info);
-	log->flush_on(spdlog::level::info);
+	log->flush_on(spdlog::level::err);
 
 	spdlog::set_default_logger(std::move(log));
 	spdlog::set_pattern("[%H:%M:%S:%e] %v"s);
